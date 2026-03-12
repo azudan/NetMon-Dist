@@ -28,6 +28,31 @@
     </div>
 </div>
 
+<!-- Grille de graphiques globaux -->
+<div class="section-titre">Vue d'ensemble des métriques</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
+    <div class="carte">
+        <div class="chart-container" style="height: 280px;">
+            <canvas id="statusChart"></canvas>
+        </div>
+    </div>
+    <div class="carte">
+        <div class="chart-container" style="height: 280px;">
+            <canvas id="resourcesBarChart"></canvas>
+        </div>
+    </div>
+    <div class="carte">
+        <div class="chart-container" style="height: 280px;">
+            <canvas id="nodeActivityChart"></canvas>
+        </div>
+    </div>
+    <div class="carte">
+        <div class="chart-container" style="height: 280px;">
+            <canvas id="uptimeChart"></canvas>
+        </div>
+    </div>
+</div>
+
 <!-- Grille des noeuds -->
 <div class="section-titre">Noeuds supervisés</div>
 {% if noeuds %}
@@ -85,8 +110,382 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 (function() {
+    var statusChart = null;
+    var resourcesBarChart = null;
+    var nodeActivityChart = null;
+    var uptimeChart = null;
+    
+    function initCharts() {
+        // Status Doughnut Chart
+        var ctx1 = document.getElementById('statusChart');
+        if (ctx1) {
+            statusChart = new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: ['En ligne', 'Hors ligne'],
+                    datasets: [{
+                        data: [{{ nb_en_ligne }}, {{ nb_hors_ligne }}],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(239, 68, 68, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(239, 68, 68, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: { size: 13, weight: '500' },
+                                color: '#94a3b8'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'État des nœuds',
+                            font: { size: 16, weight: '700' },
+                            color: '#f1f5f9',
+                            padding: { bottom: 15 }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Resources Bar Chart
+        var ctx2 = document.getElementById('resourcesBarChart');
+        if (ctx2) {
+            resourcesBarChart = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'CPU %',
+                            data: [],
+                            backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'Mémoire %',
+                            data: [],
+                            backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'Disque %',
+                            data: [],
+                            backgroundColor: 'rgba(245, 158, 11, 0.7)',
+                            borderColor: 'rgba(245, 158, 11, 1)',
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 12,
+                                font: { size: 12, weight: '500' },
+                                color: '#94a3b8'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Utilisation des ressources par nœud',
+                            font: { size: 16, weight: '700' },
+                            color: '#f1f5f9',
+                            padding: { bottom: 15 }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) { return value + '%'; },
+                                color: '#94a3b8',
+                                font: { size: 11 }
+                            },
+                            grid: {
+                                color: 'rgba(148, 163, 184, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#94a3b8',
+                                font: { size: 11 }
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Node Activity Line Chart
+        var ctx3 = document.getElementById('nodeActivityChart');
+        if (ctx3) {
+            nodeActivityChart = new Chart(ctx3, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Nœuds actifs',
+                        data: [],
+                        borderColor: 'rgba(16, 185, 129, 1)',
+                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: 'rgba(16, 185, 129, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Activité des nœuds (temps réel)',
+                            font: { size: 16, weight: '700' },
+                            color: '#f1f5f9',
+                            padding: { bottom: 15 }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#94a3b8',
+                                font: { size: 11 },
+                                stepSize: 1
+                            },
+                            grid: {
+                                color: 'rgba(148, 163, 184, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#94a3b8',
+                                font: { size: 11 }
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Uptime Polar Chart
+        var ctx4 = document.getElementById('uptimeChart');
+        if (ctx4) {
+            uptimeChart = new Chart(ctx4, {
+                type: 'polarArea',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        data: [],
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(16, 185, 129, 0.7)',
+                            'rgba(245, 158, 11, 0.7)',
+                            'rgba(139, 92, 246, 0.7)',
+                            'rgba(236, 72, 153, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(245, 158, 11, 1)',
+                            'rgba(139, 92, 246, 1)',
+                            'rgba(236, 72, 153, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 10,
+                                font: { size: 11, weight: '500' },
+                                color: '#94a3b8'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Uptime des nœuds (heures)',
+                            font: { size: 16, weight: '700' },
+                            color: '#f1f5f9',
+                            padding: { bottom: 15 }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            ticks: {
+                                color: '#94a3b8',
+                                backdropColor: 'transparent'
+                            },
+                            grid: {
+                                color: 'rgba(148, 163, 184, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+    
+    var activityHistory = [];
+    var maxActivityPoints = 15;
+    
+    function updateCharts(noeuds) {
+        if (!noeuds || noeuds.length === 0) {
+            console.log('No nodes data available');
+            return;
+        }
+        
+        console.log('Updating charts with', noeuds.length, 'nodes');
+        
+        var enLigne = 0;
+        noeuds.forEach(function(n) {
+            if (n.statut === 'en_ligne') enLigne++;
+        });
+        
+        // Update status chart
+        if (statusChart) {
+            statusChart.data.datasets[0].data = [enLigne, noeuds.length - enLigne];
+            statusChart.update();
+        }
+        
+        // Update resources bar chart
+        if (resourcesBarChart) {
+            var labels = [];
+            var cpuData = [];
+            var memData = [];
+            var diskData = [];
+            
+            var activeNodes = noeuds.filter(function(n) { return n.statut === 'en_ligne'; }).slice(0, 5);
+            if (activeNodes.length === 0) {
+                activeNodes = noeuds.slice(0, 5);
+            }
+            
+            activeNodes.forEach(function(n) {
+                var shortId = n.node_id.length > 10 ? n.node_id.substring(0, 10) : n.node_id;
+                labels.push(shortId);
+                
+                var cpu = 0, mem = 0, disk = 0;
+                
+                if (n.dernier_payload_json) {
+                    try {
+                        var payload = JSON.parse(n.dernier_payload_json);
+                        cpu = parseFloat(payload.cpu_percent) || 0;
+                        mem = parseFloat(payload.memory_percent) || 0;
+                        disk = parseFloat(payload.disk_percent) || 0;
+                        console.log('Node', shortId, '- CPU:', cpu, 'MEM:', mem, 'DISK:', disk);
+                    } catch(e) {
+                        console.error('Error parsing payload for ' + n.node_id, e);
+                    }
+                } else {
+                    console.log('Node', shortId, 'has no payload data');
+                }
+                
+                cpuData.push(cpu);
+                memData.push(mem);
+                diskData.push(disk);
+            });
+            
+            console.log('Updating resource chart with labels:', labels, 'CPU:', cpuData, 'MEM:', memData, 'DISK:', diskData);
+            
+            resourcesBarChart.data.labels = labels;
+            resourcesBarChart.data.datasets[0].data = cpuData;
+            resourcesBarChart.data.datasets[1].data = memData;
+            resourcesBarChart.data.datasets[2].data = diskData;
+            resourcesBarChart.update();
+        }
+        
+        // Update activity chart
+        if (nodeActivityChart) {
+            var now = new Date();
+            var timeLabel = now.getHours().toString().padStart(2, '0') + ':' + 
+                           now.getMinutes().toString().padStart(2, '0') + ':' + 
+                           now.getSeconds().toString().padStart(2, '0');
+            
+            activityHistory.push({ time: timeLabel, count: enLigne });
+            if (activityHistory.length > maxActivityPoints) {
+                activityHistory.shift();
+            }
+            
+            nodeActivityChart.data.labels = activityHistory.map(function(h) { return h.time; });
+            nodeActivityChart.data.datasets[0].data = activityHistory.map(function(h) { return h.count; });
+            nodeActivityChart.update('none');
+        }
+        
+        // Update uptime chart
+        if (uptimeChart) {
+            var labels = [];
+            var uptimeData = [];
+            
+            var activeNodes = noeuds.filter(function(n) { return n.statut === 'en_ligne'; }).slice(0, 5);
+            if (activeNodes.length === 0) {
+                activeNodes = noeuds.slice(0, 5);
+            }
+            
+            activeNodes.forEach(function(n) {
+                var shortId = n.node_id.length > 10 ? n.node_id.substring(0, 10) : n.node_id;
+                labels.push(shortId);
+                
+                var uptimeHours = 0;
+                if (n.dernier_payload_json) {
+                    try {
+                        var payload = JSON.parse(n.dernier_payload_json);
+                        uptimeHours = parseFloat((payload.uptime_seconds || 0) / 3600);
+                        console.log('Node', shortId, 'uptime:', uptimeHours.toFixed(1), 'hours');
+                    } catch(e) {
+                        console.error('Error parsing uptime for ' + n.node_id, e);
+                    }
+                } else {
+                    console.log('Node', shortId, 'has no payload for uptime');
+                }
+                uptimeData.push(parseFloat(uptimeHours.toFixed(1)));
+            });
+            
+            console.log('Updating uptime chart with labels:', labels, 'data:', uptimeData);
+            
+            uptimeChart.data.labels = labels;
+            uptimeChart.data.datasets[0].data = uptimeData;
+            uptimeChart.update();
+        }
+    }
+    
     function maj() {
         fetch("/api/noeuds")
             .then(function(r) { return r.json(); })
@@ -124,6 +523,8 @@
                         '</div>';
                     grille.appendChild(a);
                 });
+                
+                updateCharts(noeuds);
             })
             .catch(function() {});
         fetch("/api/pannes")
@@ -137,6 +538,9 @@
             })
             .catch(function() {});
     }
+    
+    initCharts();
+    maj();
     setInterval(maj, 1000);
 })();
 </script>

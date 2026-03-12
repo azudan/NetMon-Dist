@@ -79,8 +79,16 @@ def creer_application(serveur: ServeurSupervision) -> Flask:
 
     @app.route("/api/noeuds")
     def api_noeuds():
-        return serveur.lister_noeuds()
+        noeuds = serveur.lister_noeuds()
 
+        # ensure latest payload is loaded
+        for n in noeuds:
+            fresh = serveur.obtenir_noeud(n["node_id"])
+            if fresh and fresh.get("dernier_payload_json"):
+                n["dernier_payload_json"] = fresh["dernier_payload_json"]
+
+        return noeuds
+        
     @app.route("/api/noeud/<node_id>")
     def api_detail_noeud(node_id: str):
         if not _PATTERN_NODE_ID.match(node_id):
