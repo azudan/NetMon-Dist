@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block titre %}Erreur{% endblock %}
+
+{% block contenu %}
+<div class="page-titre">Erreur</div>
+<div class="carte" style="text-align:center;padding:3rem 2rem;">
+    <p style="font-size:1.1rem;color:var(--texte-sec);margin-bottom:1.5rem;">{{ message }}</p>
+    <a href="/" class="btn btn-primaire">Retour au tableau de bord</a>
+</div>
+{% endblock %}

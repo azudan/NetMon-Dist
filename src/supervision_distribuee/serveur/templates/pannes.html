@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block titre %}Pannes{% endblock %}
+{% block nav_pannes %}actif{% endblock %}
+
+{% block contenu %}
+<div class="page-titre">Pannes récentes</div>
+
+{% if pannes %}
+<div class="carte">
+    <div class="tableau-wrap">
+    <table id="table-pannes">
+        <thead>
+            <tr>
+                <th>Noeud</th>
+                <th>Type</th>
+                <th>Message</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for panne in pannes %}
+            <tr>
+                <td><a href="/noeud/{{ panne.node_id }}" class="lien">{{ panne.node_id }}</a></td>
+                <td>{{ panne.type_evenement }}</td>
+                <td>{{ panne.message }}</td>
+                <td>{{ panne.cree_le }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% else %}
+<div class="carte"><p class="vide">Aucune panne récente détectée.</p></div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+    function maj() {
+        fetch("/api/pannes")
+            .then(function(r) { return r.json(); })
+            .then(function(pannes) {
+                var tb = document.querySelector("#table-pannes tbody");
+                if (!tb) {
+                    if (pannes.length > 0) location.reload();
+                    return;
+                }
+                tb.innerHTML = "";
+                pannes.forEach(function(p) {
+                    tb.innerHTML +=
+                        '<tr><td><a href="/noeud/' + p.node_id + '" class="lien">' + p.node_id + '</a></td>' +
+                        '<td>' + p.type_evenement + '</td>' +
+                        '<td>' + p.message + '</td>' +
+                        '<td>' + p.cree_le + '</td></tr>';
+                });
+            })
+            .catch(function() {});
+    }
+    setInterval(maj, 1000);
+})();
+</script>
+{% endblock %}

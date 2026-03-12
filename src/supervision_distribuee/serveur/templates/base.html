@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block titre %}Supervision{% endblock %} — Supervision Distribuée</title>
+    <style>
+        :root {
+            --primaire: #1a56db;
+            --primaire-fonce: #1e40af;
+            --succes: #059669;
+            --danger: #dc2626;
+            --avertissement: #d97706;
+            --fond: #f1f5f9;
+            --carte: #ffffff;
+            --bordure: #e2e8f0;
+            --texte: #0f172a;
+            --texte-sec: #64748b;
+            --nav-bg: #0f172a;
+            --nav-hover: #1e293b;
+            --rayon: 6px;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+            background: var(--fond);
+            color: var(--texte);
+            line-height: 1.5;
+            font-size: 14px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ---- Navigation ---- */
+        .nav-bar {
+            background: var(--nav-bg);
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            height: 48px;
+            gap: 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav-marque {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #f8fafc;
+            text-decoration: none;
+            letter-spacing: -0.01em;
+            margin-right: 2rem;
+            white-space: nowrap;
+        }
+        .nav-liens { display: flex; gap: 0; }
+        .nav-lien {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.82rem;
+            font-weight: 500;
+            padding: 0.75rem 1rem;
+            border-bottom: 2px solid transparent;
+            transition: color 0.15s, border-color 0.15s;
+        }
+        .nav-lien:hover { color: #e2e8f0; }
+        .nav-lien.actif { color: #f8fafc; border-bottom-color: var(--primaire); }
+        .nav-indicateur {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+        .nav-indicateur .point-live {
+            width: 6px; height: 6px;
+            background: var(--succes);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* ---- Contenu ---- */
+        .conteneur {
+            max-width: 1280px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 1.25rem 1.5rem;
+            flex: 1;
+        }
+
+        /* ---- En-tetes ---- */
+        .page-titre {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--texte);
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .section-titre {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--texte-sec);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.6rem;
+            margin-top: 1.5rem;
+        }
+        .section-titre:first-child { margin-top: 0; }
+
+        /* ---- Compteurs synthese ---- */
+        .compteurs {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap;
+        }
+        .compteur {
+            background: var(--carte);
+            border: 1px solid var(--bordure);
+            border-radius: var(--rayon);
+            padding: 0.75rem 1.25rem;
+            min-width: 140px;
+            flex: 1;
+        }
+        .compteur-valeur {
+            font-size: 1.6rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .compteur-label {
+            font-size: 0.75rem;
+            color: var(--texte-sec);
+            margin-top: 0.15rem;
+        }
+
+        /* ---- Grille ---- */
+        .grille {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        /* ---- Carte ---- */
+        .carte {
+            background: var(--carte);
+            border: 1px solid var(--bordure);
+            border-radius: var(--rayon);
+            padding: 1rem 1.15rem;
+        }
+        .carte-titre {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--texte-sec);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            margin-bottom: 0.6rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--bordure);
+        }
+        .carte-noeud {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .carte-noeud:hover {
+            border-color: var(--primaire);
+            box-shadow: 0 0 0 1px var(--primaire);
+        }
+        .carte-noeud-entete {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        .carte-noeud-nom {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--texte);
+        }
+        .carte-noeud-infos {
+            font-size: 0.8rem;
+            color: var(--texte-sec);
+            line-height: 1.6;
+        }
+
+        /* ---- Statut ---- */
+        .statut {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .statut-point {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .statut-en-ligne .statut-point { background: var(--succes); }
+        .statut-en-ligne { color: var(--succes); }
+        .statut-hors-ligne .statut-point { background: var(--danger); }
+        .statut-hors-ligne { color: var(--danger); }
+
+        /* ---- Badge ---- */
+        .badge {
+            display: inline-block;
+            padding: 0.1rem 0.45rem;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        .badge-succes { background: #ecfdf5; color: var(--succes); }
+        .badge-danger { background: #fef2f2; color: var(--danger); }
+        .badge-attente { background: #fffbeb; color: var(--avertissement); }
+
+        /* ---- Jauge ---- */
+        .jauge-groupe { margin-bottom: 0.6rem; }
+        .jauge-groupe:last-child { margin-bottom: 0; }
+        .jauge-entete {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 0.25rem;
+        }
+        .jauge-label { font-size: 0.8rem; color: var(--texte-sec); }
+        .jauge-valeur { font-size: 0.85rem; font-weight: 600; }
+        .jauge {
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .jauge-remplissage {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+        .jauge-ok { background: var(--succes); }
+        .jauge-warn { background: var(--avertissement); }
+        .jauge-crit { background: var(--danger); }
+
+        /* ---- Metriques chiffres ---- */
+        .metriques-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 0.6rem;
+            margin-bottom: 1rem;
+        }
+        .metrique-box {
+            background: var(--carte);
+            border: 1px solid var(--bordure);
+            border-radius: var(--rayon);
+            padding: 0.85rem 1rem;
+            text-align: center;
+        }
+        .metrique-val {
+            font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .metrique-lab {
+            font-size: 0.72rem;
+            color: var(--texte-sec);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            margin-top: 0.15rem;
+        }
+
+        /* ---- Tableau ---- */
+        .tableau-wrap {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+        thead th {
+            text-align: left;
+            padding: 0.55rem 0.75rem;
+            font-weight: 600;
+            font-size: 0.72rem;
+            color: var(--texte-sec);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            background: #f8fafc;
+            border-bottom: 2px solid var(--bordure);
+            white-space: nowrap;
+        }
+        tbody td {
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+        tbody tr:hover { background: #f8fafc; }
+
+        /* ---- Tags services/ports ---- */
+        .tags { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.2rem 0.55rem;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            background: #f1f5f9;
+            color: var(--texte-sec);
+        }
+        .tag-actif { background: #ecfdf5; color: var(--succes); }
+        .tag-inactif { background: #fef2f2; color: var(--danger); }
+        .tag-ouvert { background: #ecfdf5; color: var(--succes); }
+        .tag-point {
+            width: 5px; height: 5px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .tag-actif .tag-point { background: var(--succes); }
+        .tag-inactif .tag-point { background: var(--danger); }
+        .tag-ouvert .tag-point { background: var(--succes); }
+        .tag:not(.tag-actif):not(.tag-inactif):not(.tag-ouvert) .tag-point { background: #94a3b8; }
+
+        /* ---- Liens ---- */
+        .lien { color: var(--primaire); text-decoration: none; font-weight: 500; }
+        .lien:hover { text-decoration: underline; }
+
+        /* ---- Formulaire ---- */
+        .form-ligne {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.6rem;
+        }
+        .form-champ {
+            padding: 0.4rem 0.65rem;
+            border: 1px solid var(--bordure);
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-family: inherit;
+            background: #fff;
+            color: var(--texte);
+        }
+        .form-champ:focus {
+            outline: none;
+            border-color: var(--primaire);
+            box-shadow: 0 0 0 2px rgba(26,86,219,0.15);
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.4rem 0.9rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.15s;
+            text-decoration: none;
+        }
+        .btn-primaire { background: var(--primaire); color: #fff; }
+        .btn-primaire:hover { background: var(--primaire-fonce); }
+
+        /* ---- Vide ---- */
+        .vide {
+            color: var(--texte-sec);
+            font-size: 0.85rem;
+            padding: 1.25rem;
+            text-align: center;
+        }
+
+        /* ---- Pied ---- */
+        .pied {
+            text-align: center;
+            padding: 1rem 1.5rem;
+            font-size: 0.72rem;
+            color: #94a3b8;
+            border-top: 1px solid var(--bordure);
+            margin-top: auto;
+        }
+
+        /* ---- Detail layout ---- */
+        .detail-grille {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav-bar">
+        <a href="/" class="nav-marque">Supervision Distribuée</a>
+        <div class="nav-liens">
+            <a href="/" class="nav-lien {% block nav_dashboard %}{% endblock %}">Tableau de bord</a>
+            <a href="/pannes" class="nav-lien {% block nav_pannes %}{% endblock %}">Pannes</a>
+        </div>
+        <div class="nav-indicateur">
+            <span class="point-live"></span>
+            Temps réel
+        </div>
+    </nav>
+    <div class="conteneur">
+        {% block contenu %}{% endblock %}
+    </div>
+    <div class="pied">
+        Supervision Distribuée &mdash; Projet Systèmes Répartis, M1 SRIV 2025-2026
+    </div>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

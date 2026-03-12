@@ -14,9 +14,10 @@ if str(SRC_DIR) not in sys.path:
 from supervision_distribuee.common.journalisation import configurer_logging
 from supervision_distribuee.config import (
     CHEMIN_BD_DEFAUT,
-    HOTE_DEFAUT,
+    HOTE_ECOUTE_DEFAUT,
     INTERVALLE_SCAN_PANNE_DEFAUT,
     PORT_DEFAUT,
+    PORT_WEB_DEFAUT,
     TAILLE_POOL_BD_DEFAUT,
     TIMEOUT_CLIENT_DEFAUT,
     WORKERS_SERVEUR_DEFAUT,
@@ -27,13 +28,15 @@ from supervision_distribuee.serveur.service import ServeurSupervision
 
 def creer_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Lancer le serveur de supervision distribué")
-    parser.add_argument("--host", default=HOTE_DEFAUT)
+    parser.add_argument("--host", default=HOTE_ECOUTE_DEFAUT)
     parser.add_argument("--port", type=int, default=PORT_DEFAUT)
     parser.add_argument("--db", default=str(CHEMIN_BD_DEFAUT))
     parser.add_argument("--workers", type=int, default=WORKERS_SERVEUR_DEFAUT)
     parser.add_argument("--db-pool-size", type=int, default=TAILLE_POOL_BD_DEFAUT)
     parser.add_argument("--client-timeout", type=float, default=TIMEOUT_CLIENT_DEFAUT)
     parser.add_argument("--failure-scan-interval", type=float, default=INTERVALLE_SCAN_PANNE_DEFAUT)
+    parser.add_argument("--web", action="store_true", help="Activer l'interface web")
+    parser.add_argument("--web-port", type=int, default=PORT_WEB_DEFAUT, help="Port de l'interface web")
     return parser
 
 
@@ -51,6 +54,9 @@ def main() -> None:
         failure_scan_interval=args.failure_scan_interval,
     )
     serveur.start()
+    if args.web:
+        from supervision_distribuee.serveur.interface_web import lancer_interface_web
+        lancer_interface_web(serveur, host=args.host, port=args.web_port)
     try:
         cli = CLIServeur(serveur)
         cli.run()
