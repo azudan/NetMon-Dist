@@ -43,6 +43,7 @@ Modules principaux :
 - `serveur/service.py` — classe `ServeurSupervision`
 - `serveur/registre.py` — classe `RegistreNoeuds`
 - `serveur/cli.py` — classe `CLIServeur`
+- `serveur/interface_web.py` — application Flask d'administration
 
 ### 3. Stockage
 
@@ -87,6 +88,24 @@ Raisons du choix :
 - bien adapté aux sockets bloquantes
 - suffisant pour un projet académique
 - permet de gérer plusieurs agents sans complexité excessive
+
+### Interface web
+
+Le serveur peut facultativement lancer une interface web Flask dans un thread daemon.
+
+Responsabilités :
+
+- afficher le tableau de bord avec l'état de tous les nœuds
+- afficher le détail d'un nœud avec ses métriques, services, ports
+- permettre l'envoi de la commande UP via formulaire
+- exposer une API JSON pour le rafraîchissement automatique
+- afficher les pannes récentes
+
+L'interface web réutilise les méthodes existantes de `ServeurSupervision` et ne modifie en rien le protocole TCP.
+
+### Séparation client-serveur
+
+Le serveur écoute par défaut sur `0.0.0.0` (toutes les interfaces), ce qui permet à des agents situés sur d'autres machines du réseau de se connecter. Le client spécifie l'adresse IP du serveur via `--server-host`.
 
 ### Côté base de données
 

@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+
+{% block titre %}{{ noeud.node_id }}{% endblock %}
+{% block nav_dashboard %}actif{% endblock %}
+
+{% block contenu %}
+<div class="page-titre">
+    {{ noeud.node_id }}
+    {% if noeud.statut == "en_ligne" %}
+    <span class="statut statut-en-ligne"><span class="statut-point"></span> En ligne</span>
+    {% else %}
+    <span class="statut statut-hors-ligne"><span class="statut-point"></span> Hors ligne</span>
+    {% endif %}
+</div>
+
+<!-- Jauges principales -->
+<div class="metriques-row" id="jauges">
+    {% set cpu = payload.cpu_percent|default(0) %}
+    {% set mem = payload.memory_percent|default(0) %}
+    {% set dsk = payload.disk_percent|default(0) %}
+    <div class="metrique-box">
+        <div class="metrique-val" id="val-cpu" style="color:{% if cpu > 90 %}var(--danger){% elif cpu > 70 %}var(--avertissement){% else %}var(--texte){% endif %}">{{ "%.1f"|format(cpu) }}%</div>
+        <div class="metrique-lab">CPU</div>
+        <div class="jauge"><div class="jauge-remplissage {% if cpu > 90 %}jauge-crit{% elif cpu > 70 %}jauge-warn{% else %}jauge-ok{% endif %}" id="bar-cpu" style="width:{{ cpu }}%"></div></div>
+    </div>
+    <div class="metrique-box">
+        <div class="metrique-val" id="val-mem" style="color:{% if mem > 90 %}var(--danger){% elif mem > 70 %}var(--avertissement){% else %}var(--texte){% endif %}">{{ "%.1f"|format(mem) }}%</div>
+        <div class="metrique-lab">Mémoire</div>
+        <div class="jauge"><div class="jauge-remplissage {% if mem > 90 %}jauge-crit{% elif mem > 70 %}jauge-warn{% else %}jauge-ok{% endif %}" id="bar-mem" style="width:{{ mem }}%"></div></div>
+    </div>
+    <div class="metrique-box">
+        <div class="metrique-val" id="val-dsk" style="color:{% if dsk > 90 %}var(--danger){% elif dsk > 70 %}var(--avertissement){% else %}var(--texte){% endif %}">{{ "%.1f"|format(dsk) }}%</div>
+        <div class="metrique-lab">Disque</div>
+        <div class="jauge"><div class="jauge-remplissage {% if dsk > 90 %}jauge-crit{% elif dsk > 70 %}jauge-warn{% else %}jauge-ok{% endif %}" id="bar-dsk" style="width:{{ dsk }}%"></div></div>
+    </div>
+    <div class="metrique-box">
+        <div class="metrique-val" id="val-uptime" style="color:var(--texte)">{{ payload.uptime_seconds|default(0) }}s</div>
+        <div class="metrique-lab">Uptime</div>
+    </div>
+</div>
+
+<div class="detail-grille">
+    <!-- Informations systeme -->
+    <div class="carte">
+        <div class="carte-titre">Informations système</div>
+        <div class="carte-noeud-infos" id="infos-sys">
+            <strong>OS</strong> : {{ noeud.os_name }}<br>
+            <strong>CPU</strong> : {{ noeud.cpu_model }}<br>
+            <strong>Dernier contact</strong> : {{ noeud.dernier_contact }}
+        </div>
+    </div>
+
+    <!-- Services -->
+    <div class="carte">
+        <div class="carte-titre">Services</div>
+        {% if payload.services %}
+        <div class="tags" id="tags-services">
+            {% for nom, etat in payload.services.items() %}
+            <span class="tag {% if etat == 'active' %}tag-actif{% else %}tag-inactif{% endif %}">
+                <span class="tag-point"></span> {{ nom }}
+            </span>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="vide">Aucun service supervisé</p>
+        {% endif %}
+    </div>
+
+    <!-- Ports -->
+    <div class="carte">
+        <div class="carte-titre">Ports</div>
+        {% if payload.ports %}
+        <div class="tags" id="tags-ports">
+            {% for port, etat in payload.ports.items() %}
+            <span class="tag {% if etat == 'open' %}tag-ouvert{% else %}{% endif %}">
+                <span class="tag-point"></span> {{ port }}
+            </span>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="vide">Aucun port surveillé</p>
+        {% endif %}
+    </div>
+
+    <!-- Commande UP -->
+    <div class="carte">
+        <div class="carte-titre">Envoyer une commande</div>
+        <form action="/commande" method="post" class="form-ligne">
+            <input type="hidden" name="node_id" value="{{ noeud.node_id }}">
+            {% if payload.services %}
+            <select name="service_name" id="service_name" class="form-champ">
+                {% for nom in payload.services.keys() %}
+                <option value="{{ nom }}">{{ nom }}</option>
+                {% endfor %}
+            </select>
+            {% else %}
+            <input type="text" name="service_name" id="service_name" class="form-champ" placeholder="service" required>
+            {% endif %}
+            <button type="submit" class="btn btn-primaire">Envoyer UP</button>
+        </form>
+    </div>
+</div>
+
+<!-- Historique -->
+<div class="section-titre">Historique des métriques</div>
+{% if historique %}
+<div class="carte">
+    <div class="tableau-wrap">
+    <table id="table-historique">
+        <thead>
+            <tr><th>Horodatage</th><th>CPU %</th><th>Mémoire %</th><th>Disque %</th><th>Uptime (s)</th><th>Reçu le</th></tr>
+        </thead>
+        <tbody>
+            {% for h in historique %}
+            <tr>
+                <td>{{ h.horodatage }}</td>
+                <td>{{ "%.1f"|format(h.cpu_percent) }}</td>
+                <td>{{ "%.1f"|format(h.memory_percent) }}</td>
+                <td>{{ "%.1f"|format(h.disk_percent) }}</td>
+                <td>{{ h.uptime_seconds }}</td>
+                <td>{{ h.recu_le }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% else %}
+<div class="carte"><p class="vide">Aucun historique disponible</p></div>
+{% endif %}
+
+<!-- Commandes -->
+<div class="section-titre">Commandes envoyées</div>
+{% if commandes %}
+<div class="carte">
+    <div class="tableau-wrap">
+    <table>
+        <thead>
+            <tr><th>ID</th><th>Commande</th><th>Service</th><th>Statut</th><th>Réponse</th><th>Date</th></tr>
+        </thead>
+        <tbody>
+            {% for cmd in commandes %}
+            <tr>
+                <td>{{ cmd.id }}</td>
+                <td>{{ cmd.nom_commande }}</td>
+                <td>{{ cmd.nom_service }}</td>
+                <td>
+                    {% if cmd.statut == "termine" %}
+                    <span class="badge badge-succes">{{ cmd.statut }}</span>
+                    {% elif cmd.statut == "echoue" %}
+                    <span class="badge badge-danger">{{ cmd.statut }}</span>
+                    {% else %}
+                    <span class="badge badge-attente">{{ cmd.statut }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ cmd.message_reponse or "—" }}</td>
+                <td>{{ cmd.cree_le }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% else %}
+<div class="carte"><p class="vide">Aucune commande envoyée</p></div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+    var nodeId = "{{ noeud.node_id }}";
+    function couleurJauge(v) { return v > 90 ? "jauge-crit" : v > 70 ? "jauge-warn" : "jauge-ok"; }
+    function couleurVal(v) { return v > 90 ? "var(--danger)" : v > 70 ? "var(--avertissement)" : "var(--texte)"; }
+
+    function maj() {
+        fetch("/api/noeud/" + nodeId)
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.erreur) return;
+                var n = data.noeud;
+                var p = {};
+                try { p = JSON.parse(n.dernier_payload_json || "{}"); } catch(e) {}
+
+                // Jauges
+                var cpu = p.cpu_percent || 0, mem = p.memory_percent || 0, dsk = p.disk_percent || 0;
+                var vc = document.getElementById("val-cpu");
+                if (vc) { vc.textContent = cpu.toFixed(1) + "%"; vc.style.color = couleurVal(cpu); }
+                var bc = document.getElementById("bar-cpu");
+                if (bc) { bc.style.width = cpu + "%"; bc.className = "jauge-remplissage " + couleurJauge(cpu); }
+
+                var vm = document.getElementById("val-mem");
+                if (vm) { vm.textContent = mem.toFixed(1) + "%"; vm.style.color = couleurVal(mem); }
+                var bm = document.getElementById("bar-mem");
+                if (bm) { bm.style.width = mem + "%"; bm.className = "jauge-remplissage " + couleurJauge(mem); }
+
+                var vd = document.getElementById("val-dsk");
+                if (vd) { vd.textContent = dsk.toFixed(1) + "%"; vd.style.color = couleurVal(dsk); }
+                var bd = document.getElementById("bar-dsk");
+                if (bd) { bd.style.width = dsk + "%"; bd.className = "jauge-remplissage " + couleurJauge(dsk); }
+
+                var vu = document.getElementById("val-uptime");
+                if (vu) vu.textContent = (p.uptime_seconds || 0) + "s";
+
+                // Services
+                var ts = document.getElementById("tags-services");
+                if (ts && p.services) {
+                    ts.innerHTML = "";
+                    Object.keys(p.services).forEach(function(nom) {
+                        var etat = p.services[nom];
+                        var cls = etat === "active" ? "tag-actif" : "tag-inactif";
+                        ts.innerHTML += '<span class="tag ' + cls + '"><span class="tag-point"></span> ' + nom + '</span>';
+                    });
+                }
+
+                // Ports
+                var tp = document.getElementById("tags-ports");
+                if (tp && p.ports) {
+                    tp.innerHTML = "";
+                    Object.keys(p.ports).forEach(function(port) {
+                        var etat = p.ports[port];
+                        var cls = etat === "open" ? "tag-ouvert" : "";
+                        tp.innerHTML += '<span class="tag ' + cls + '"><span class="tag-point"></span> ' + port + '</span>';
+                    });
+                }
+
+                // Historique
+                if (data.historique) {
+                    var tb = document.querySelector("#table-historique tbody");
+                    if (tb) {
+                        tb.innerHTML = "";
+                        data.historique.forEach(function(h) {
+                            tb.innerHTML +=
+                                "<tr><td>" + h.horodatage + "</td>" +
+                                "<td>" + h.cpu_percent.toFixed(1) + "</td>" +
+                                "<td>" + h.memory_percent.toFixed(1) + "</td>" +
+                                "<td>" + h.disk_percent.toFixed(1) + "</td>" +
+                                "<td>" + h.uptime_seconds + "</td>" +
+                                "<td>" + h.recu_le + "</td></tr>";
+                        });
+                    }
+                }
+            })
+            .catch(function() {});
+    }
+    setInterval(maj, 1000);
+})();
+</script>
+{% endblock %}

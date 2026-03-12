@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block titre %}Tableau de bord{% endblock %}
+{% block nav_dashboard %}actif{% endblock %}
+
+{% block contenu %}
+<div class="page-titre">Tableau de bord</div>
+
+<!-- Compteurs de synthese -->
+<div class="compteurs" id="compteurs">
+    {% set nb_en_ligne = noeuds|selectattr("statut", "equalto", "en_ligne")|list|length %}
+    {% set nb_hors_ligne = noeuds|length - nb_en_ligne %}
+    <div class="compteur">
+        <div class="compteur-valeur">{{ noeuds|length }}</div>
+        <div class="compteur-label">Noeuds enregistrés</div>
+    </div>
+    <div class="compteur">
+        <div class="compteur-valeur" style="color:var(--succes)">{{ nb_en_ligne }}</div>
+        <div class="compteur-label">En ligne</div>
+    </div>
+    <div class="compteur">
+        <div class="compteur-valeur" style="color:var(--danger)">{{ nb_hors_ligne }}</div>
+        <div class="compteur-label">Hors ligne</div>
+    </div>
+    <div class="compteur">
+        <div class="compteur-valeur" style="color:var(--avertissement)">{{ pannes|length }}</div>
+        <div class="compteur-label">Pannes récentes</div>
+    </div>
+</div>
+
+<!-- Grille des noeuds -->
+<div class="section-titre">Noeuds supervisés</div>
+{% if noeuds %}
+<div class="grille" id="grille-noeuds">
+    {% for noeud in noeuds %}
+    <a href="/noeud/{{ noeud.node_id }}" class="carte carte-noeud">
+        <div class="carte-noeud-entete">
+            <span class="carte-noeud-nom">{{ noeud.node_id }}</span>
+            {% if noeud.statut == "en_ligne" %}
+            <span class="statut statut-en-ligne"><span class="statut-point"></span> En ligne</span>
+            {% else %}
+            <span class="statut statut-hors-ligne"><span class="statut-point"></span> Hors ligne</span>
+            {% endif %}
+        </div>
+        <div class="carte-noeud-infos">
+            {{ noeud.os_name }}<br>
+            {{ noeud.cpu_model }}<br>
+            Dernier contact : {{ noeud.dernier_contact }}
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="carte">
+    <p class="vide">Aucun noeud enregistré. Lancez un agent client pour commencer la supervision.</p>
+</div>
+{% endif %}
+
+<!-- Pannes recentes -->
+<div class="section-titre">Pannes récentes</div>
+{% if pannes %}
+<div class="carte">
+    <div class="tableau-wrap">
+    <table>
+        <thead>
+            <tr><th>Noeud</th><th>Message</th><th>Date</th></tr>
+        </thead>
+        <tbody>
+            {% for panne in pannes %}
+            <tr>
+                <td><a href="/noeud/{{ panne.node_id }}" class="lien">{{ panne.node_id }}</a></td>
+                <td>{{ panne.message }}</td>
+                <td>{{ panne.cree_le }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% else %}
+<div class="carte">
+    <p class="vide">Aucune panne récente détectée.</p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+    function maj() {
+        fetch("/api/noeuds")
+            .then(function(r) { return r.json(); })
+            .then(function(noeuds) {
+                var enLigne = 0, horsLigne = 0;
+                noeuds.forEach(function(n) {
+                    if (n.statut === "en_ligne") enLigne++; else horsLigne++;
+                });
+                var c = document.getElementById("compteurs");
+                if (c) {
+                    var vals = c.querySelectorAll(".compteur-valeur");
+                    if (vals[0]) vals[0].textContent = noeuds.length;
+                    if (vals[1]) vals[1].textContent = enLigne;
+                    if (vals[2]) vals[2].textContent = horsLigne;
+                }
+                var grille = document.getElementById("grille-noeuds");
+                if (!grille) return;
+                grille.innerHTML = "";
+                noeuds.forEach(function(n) {
+                    var a = document.createElement("a");
+                    a.href = "/noeud/" + n.node_id;
+                    a.className = "carte carte-noeud";
+                    var estEnLigne = n.statut === "en_ligne";
+                    a.innerHTML =
+                        '<div class="carte-noeud-entete">' +
+                            '<span class="carte-noeud-nom">' + n.node_id + '</span>' +
+                            '<span class="statut ' + (estEnLigne ? 'statut-en-ligne' : 'statut-hors-ligne') + '">' +
+                                '<span class="statut-point"></span> ' + (estEnLigne ? 'En ligne' : 'Hors ligne') +
+                            '</span>' +
+                        '</div>' +
+                        '<div class="carte-noeud-infos">' +
+                            n.os_name + '<br>' +
+                            n.cpu_model + '<br>' +
+                            'Dernier contact : ' + n.dernier_contact +
+                        '</div>';
+                    grille.appendChild(a);
+                });
+            })
+            .catch(function() {});
+        fetch("/api/pannes")
+            .then(function(r) { return r.json(); })
+            .then(function(pannes) {
+                var c = document.getElementById("compteurs");
+                if (c) {
+                    var vals = c.querySelectorAll(".compteur-valeur");
+                    if (vals[3]) vals[3].textContent = pannes.length;
+                }
+            })
+            .catch(function() {});
+    }
+    setInterval(maj, 1000);
+})();
+</script>
+{% endblock %}

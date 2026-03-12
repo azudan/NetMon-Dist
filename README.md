@@ -19,14 +19,16 @@ Projet de Systèmes Répartis réalisé en Python, basé sur une architecture cl
 - journalisation des alertes et des pannes
 - détection de panne après délai configurable
 - interface CLI d'administration côté serveur
+- interface web d'administration (Flask)
 - commande `UP` envoyée du serveur vers un client
+- client et serveur séparés, déployables sur des machines différentes
 - script de test de charge pour 10, 50 et 100 clients
 - tests unitaires et test d'intégration
 
 ## Architecture
 
 - `src/supervision_distribuee/client/` : agent de supervision
-- `src/supervision_distribuee/serveur/` : serveur, stockage, registre des clients
+- `src/supervision_distribuee/serveur/` : serveur, stockage, registre des clients, interface web
 - `src/supervision_distribuee/common/` : protocole, modèles, utilitaires
 - `scripts/` : lancement serveur/client et test de charge
 - `tests/` : tests automatisés
@@ -55,8 +57,16 @@ python -m pip install -r requirements.txt
 ## Lancer le serveur
 
 ```bash
-python scripts/lancer_serveur.py --host 127.0.0.1 --port 9000 --db data/supervision.db
+python scripts/lancer_serveur.py --host 0.0.0.0 --port 9000 --db data/supervision.db
 ```
+
+### Avec l'interface web
+
+```bash
+python scripts/lancer_serveur.py --host 0.0.0.0 --port 9000 --web --web-port 8080
+```
+
+L'interface web est accessible à l'adresse `http://<IP_DU_SERVEUR>:8080`.
 
 Commandes CLI du serveur :
 
@@ -71,7 +81,14 @@ Commandes CLI du serveur :
 ## Lancer un client
 
 ```bash
+# En local (même machine que le serveur)
 python scripts/lancer_client.py --node-id noeud-1 --server-host 127.0.0.1 --server-port 9000
+
+# Depuis un autre ordinateur du réseau
+python scripts/lancer_client.py --node-id noeud-2 --server-host 192.168.1.100 --server-port 9000
+
+# Avec métriques simulées (sans psutil)
+python scripts/lancer_client.py --node-id noeud-3 --server-host 192.168.1.100 --server-port 9000 --simulate
 ```
 
 ## Test de charge
