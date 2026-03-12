@@ -120,7 +120,7 @@
                         '<div class="carte-noeud-infos">' +
                             n.os_name + '<br>' +
                             n.cpu_model + '<br>' +
-                            'Dernier contact : ' + n.dernier_contact +
+                            'Dernier contact : <strong>' + formatTimestamp(n.dernier_contact) + '</strong>' +
                         '</div>';
                     grille.appendChild(a);
                 });

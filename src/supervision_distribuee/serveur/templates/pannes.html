@@ -49,12 +49,15 @@
                     return;
                 }
                 tb.innerHTML = "";
-                pannes.forEach(function(p) {
-                    tb.innerHTML +=
-                        '<tr><td><a href="/noeud/' + p.node_id + '" class="lien">' + p.node_id + '</a></td>' +
+                pannes.forEach(function(p, idx) {
+                    var tr = document.createElement('tr');
+                    tr.style.animationDelay = (idx * 0.03) + 's';
+                    tr.innerHTML =
+                        '<td><a href="/noeud/' + p.node_id + '" class="lien">' + p.node_id + '</a></td>' +
                         '<td>' + p.type_evenement + '</td>' +
                         '<td>' + p.message + '</td>' +
-                        '<td>' + p.cree_le + '</td></tr>';
+                        '<td>' + formatTimestamp(p.cree_le) + '</td>';
+                    tb.appendChild(tr);
                 });
             })
             .catch(function() {});

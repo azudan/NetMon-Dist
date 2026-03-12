@@ -231,12 +231,12 @@
                         tb.innerHTML = "";
                         data.historique.forEach(function(h) {
                             tb.innerHTML +=
-                                "<tr><td>" + h.horodatage + "</td>" +
+                                "<tr><td>" + formatDate(h.horodatage) + "</td>" +
                                 "<td>" + h.cpu_percent.toFixed(1) + "</td>" +
                                 "<td>" + h.memory_percent.toFixed(1) + "</td>" +
                                 "<td>" + h.disk_percent.toFixed(1) + "</td>" +
                                 "<td>" + h.uptime_seconds + "</td>" +
-                                "<td>" + h.recu_le + "</td></tr>";
+                                "<td>" + formatTimestamp(h.recu_le) + "</td></tr>";
                         });
                     }
                 }
