@@ -6,19 +6,37 @@
     <title>{% block titre %}Supervision{% endblock %} — Supervision Distribuée</title>
     <style>
         :root {
-            --primaire: #1a56db;
-            --primaire-fonce: #1e40af;
-            --succes: #059669;
-            --danger: #dc2626;
-            --avertissement: #d97706;
-            --fond: #f1f5f9;
-            --carte: #ffffff;
-            --bordure: #e2e8f0;
-            --texte: #0f172a;
-            --texte-sec: #64748b;
-            --nav-bg: #0f172a;
-            --nav-hover: #1e293b;
-            --rayon: 6px;
+            --primaire: #3b82f6;
+            --primaire-fonce: #2563eb;
+            --primaire-light: #60a5fa;
+            --succes: #10b981;
+            --succes-light: #34d399;
+            --danger: #ef4444;
+            --danger-light: #f87171;
+            --avertissement: #f59e0b;
+            --avertissement-light: #fbbf24;
+            --fond: #0f172a;
+            --fond-sec: #1e293b;
+            --fond-tertiary: #334155;
+            --carte: #1e293b;
+            --carte-hover: #334155;
+            --bordure: #334155;
+            --bordure-light: #475569;
+            --texte: #f1f5f9;
+            --texte-sec: #94a3b8;
+            --texte-light: #64748b;
+            --nav-bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --nav-hover: #334155;
+            --rayon: 12px;
+            --rayon-sm: 8px;
+            --ombre-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+            --ombre: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+            --ombre-md: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+            --ombre-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+            --ombre-hover: 0 25px 30px -5px rgba(0, 0, 0, 0.7), 0 10px 12px -6px rgba(0, 0, 0, 0.6);
+            --glow-primaire: 0 0 20px rgba(59, 130, 246, 0.3);
+            --glow-succes: 0 0 20px rgba(16, 185, 129, 0.3);
+            --glow-danger: 0 0 20px rgba(239, 68, 68, 0.3);
         }
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -38,11 +56,14 @@
             display: flex;
             align-items: center;
             padding: 0 1.5rem;
-            height: 48px;
+            height: 64px;
             gap: 0;
             position: sticky;
             top: 0;
             z-index: 100;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 20px rgba(59, 130, 246, 0.1);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--bordure);
         }
         .nav-marque {
             font-weight: 700;
@@ -84,6 +105,17 @@
             50% { opacity: 0.4; }
         }
 
+        /* ---- Chart container ---- */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: var(--rayon-sm);
+            border: 1px solid var(--bordure);
+        }
+
         /* ---- Contenu ---- */
         .conteneur {
             max-width: 1280px;
@@ -95,13 +127,17 @@
 
         /* ---- En-tetes ---- */
         .page-titre {
-            font-size: 1.15rem;
-            font-weight: 700;
+            font-size: 2rem;
+            font-weight: 800;
             color: var(--texte);
-            margin-bottom: 1.25rem;
+            margin-bottom: 2rem;
             display: flex;
             align-items: center;
-            gap: 0.6rem;
+            gap: 0.75rem;
+            letter-spacing: -0.02em;
+            text-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--bordure);
         }
         .section-titre {
             font-size: 0.82rem;
@@ -130,9 +166,15 @@
             flex: 1;
         }
         .compteur-valeur {
-            font-size: 1.6rem;
-            font-weight: 700;
+            font-size: 2.5rem;
+            font-weight: 800;
             line-height: 1.2;
+            color: var(--texte);
+            text-shadow: 0 0 20px rgba(59, 130, 246, 0.5), 0 0 40px rgba(59, 130, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+        .compteur:hover .compteur-valeur {
+            text-shadow: 0 0 30px rgba(59, 130, 246, 0.8), 0 0 60px rgba(59, 130, 246, 0.5);
         }
         .compteur-label {
             font-size: 0.75rem;
@@ -153,7 +195,16 @@
             background: var(--carte);
             border: 1px solid var(--bordure);
             border-radius: var(--rayon);
-            padding: 1rem 1.15rem;
+            padding: 1.5rem;
+            box-shadow: var(--ombre);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%);
+        }
+        .carte:hover {
+            box-shadow: var(--ombre-md);
+            border-color: var(--bordure-light);
+            background: linear-gradient(135deg, rgba(51, 65, 85, 0.95) 0%, rgba(51, 65, 85, 0.85) 100%);
         }
         .carte-titre {
             font-size: 0.82rem;
@@ -259,11 +310,43 @@
             margin-bottom: 1rem;
         }
         .metrique-box {
-            background: var(--carte);
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%);
             border: 1px solid var(--bordure);
             border-radius: var(--rayon);
-            padding: 0.85rem 1rem;
+            padding: 1.5rem 1.25rem;
             text-align: center;
+            box-shadow: var(--ombre);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        .metrique-box::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primaire), var(--primaire-light));
+            box-shadow: 0 0 10px var(--primaire);
+        }
+        .metrique-box::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(59, 130, 246, 0.1), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .metrique-box:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--ombre-lg), var(--glow-primaire);
+            border-color: var(--primaire);
+            background: linear-gradient(135deg, rgba(51, 65, 85, 0.95) 0%, rgba(51, 65, 85, 0.85) 100%);
+        }
+        .metrique-box:hover::after {
+            opacity: 1;
         }
         .metrique-val {
             font-size: 1.5rem;
@@ -386,11 +469,13 @@
         /* ---- Pied ---- */
         .pied {
             text-align: center;
-            padding: 1rem 1.5rem;
-            font-size: 0.72rem;
-            color: #94a3b8;
-            border-top: 1px solid var(--bordure);
+            padding: 2rem;
+            font-size: 0.85rem;
+            color: var(--texte-sec);
+            border-top: 2px solid var(--bordure);
             margin-top: auto;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
         }
 
         /* ---- Detail layout ---- */
