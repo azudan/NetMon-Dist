@@ -26,7 +26,7 @@ Projet de Systèmes Répartis réalisé en Python, basé sur une architecture cl
 - tests unitaires et test d'intégration
 
 ## Architecture
-
+![[architecture.gif]]
 - `src/supervision_distribuee/client/` : agent de supervision
 - `src/supervision_distribuee/serveur/` : serveur, stockage, registre des clients, interface web
 - `src/supervision_distribuee/common/` : protocole, modèles, utilitaires
@@ -105,8 +105,11 @@ python scripts/suite_benchmark.py
 ## Tests automatisés
 
 ```bash
-$env:PYTHONPATH = "src"
-python -m unittest discover -s tests -v
+└─$ python test_charge.py --host 127.0.0.1 --port 9000 --clients 10 --duration 8
+Clients lancés : 10
+Durée moyenne observée : 8.36s
+Durée max observée : 10.41s
+Durée min observée : 8.00s
 ```
 
 ## Choix techniques

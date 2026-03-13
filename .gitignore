@@ -11,3 +11,6 @@ data/*.db
 dist/
 build/
 data/
+.obsidian/
+workspace.json
+.obsidian/workspace.json
