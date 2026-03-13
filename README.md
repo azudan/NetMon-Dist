@@ -6,9 +6,9 @@ Projet de Systèmes Répartis réalisé en Python, basé sur une architecture cl
 
 ## Membres du groupe
 
-- Abdallah NDIAYE
-- Mouhamadou Lamine Bamba Thiam
-- Azubuike Daniel EZEADIM
+- Abdallah NDIAYE - [LayeSec006]
+- Mouhamadou Lamine Bamba Thiam - [rootlamine]
+- Azubuike Daniel EZEADIM - [azudan, Simple0x0]
 
 ## Fonctionnalités
 
