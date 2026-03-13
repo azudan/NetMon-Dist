@@ -26,7 +26,7 @@ Projet de Systèmes Répartis réalisé en Python, basé sur une architecture cl
 - tests unitaires et test d'intégration
 
 ## Architecture
-![[architecture.gif]]
+![[RAPPORT/architecture.gif]]
 - `src/supervision_distribuee/client/` : agent de supervision
 - `src/supervision_distribuee/serveur/` : serveur, stockage, registre des clients, interface web
 - `src/supervision_distribuee/common/` : protocole, modèles, utilitaires
