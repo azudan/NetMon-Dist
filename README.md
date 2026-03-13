@@ -101,7 +101,7 @@ python scripts/suite_benchmark.py
 ```
 
 `suite_benchmark.py` démarre automatiquement un serveur local temporaire, exécute les scénarios 10, 50 et 100 clients, puis s'arrête proprement.
-![](RAPPORT/test_charge.png)
+
 ## Tests automatisés
 
 ```bash
@@ -111,7 +111,7 @@ Durée moyenne observée : 8.36s
 Durée max observée : 10.41s
 Durée min observée : 8.00s
 ```
-
+![](RAPPORT/test_charge.png)
 ## Choix techniques
 
 - `ThreadPoolExecutor` pour le serveur multi-clients
