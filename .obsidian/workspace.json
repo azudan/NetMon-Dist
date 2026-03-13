@@ -1,0 +1,193 @@
+{
+  "main": {
+    "id": "9e6f250a0ada3091",
+    "type": "split",
+    "children": [
+      {
+        "id": "07bd46ddda179092",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "e8fd7c8ac8e3d9dd",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "RAPPORT/RAPPORT   DE PROJECT DES SYSTÈMES RÉPARTIS.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "RAPPORT   DE PROJECT DES SYSTÈMES RÉPARTIS"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "101242d32c466553",
+    "type": "split",
+    "children": [
+      {
+        "id": "ab59756e21765103",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "105d49d0de380b7a",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "037a8417716ea714",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "c7f0ea094b901184",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "472a47507731b100",
+    "type": "split",
+    "children": [
+      {
+        "id": "3bff25d827c80880",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "2448243de503877b",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "RAPPORT/RAPPORT   DE PROJECT DES SYSTÈMES RÉPARTIS.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for RAPPORT   DE PROJECT DES SYSTÈMES RÉPARTIS"
+            }
+          },
+          {
+            "id": "6d6602ed7441e4ad",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "RAPPORT/RAPPORT   DE PROJECT DES SYSTÈMES RÉPARTIS.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from RAPPORT   DE PROJECT DES SYSTÈMES RÉPARTIS"
+            }
+          },
+          {
+            "id": "5ff8de25e8522f6a",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "c84fde92a2ba6df0",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "3d0b504738e62f79",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "RAPPORT/RAPPORT   DE PROJECT DES SYSTÈMES RÉPARTIS.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of RAPPORT   DE PROJECT DES SYSTÈMES RÉPARTIS"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "e8fd7c8ac8e3d9dd",
+  "lastOpenFiles": [
+    "RAPPORT/RAPPORT   DE PROJECT DES SYSTÈMES RÉPARTIS FIANL.pdf",
+    "RAPPORT/RAPPORT   DE PROJECT DES SYSTÈMES RÉPARTIS.pdf",
+    "RAPPORT/benchmark_output.png",
+    "RAPPORT/web_dashboard.png"
+  ]
+}
